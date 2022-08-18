@@ -8,6 +8,7 @@ import { signIn } from "./routes/SignIn.js";
 import { signUp } from "./routes/SignUp.js";
 import { sendPassword } from "./routes/SendPassword.js";
 import { getBalances } from "./routes/GetBalances.js";
+import { Currency, generateWallet } from "@tatumio/tatum";
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -20,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Set Connection
 const connectDb = async () => {
   try {
-    await mongoose.connect(process.env.DATABASE_URI);
+    await mongoose.connect(`${process.env.DATABASE_URI}`);
     console.log("Database is connected :)");
   } catch (error) {
     console.log(error, "Something went wrong");
@@ -36,7 +37,6 @@ app.use("/getBalances", getBalances);
 app.get("/", (req, res) => {
   res.send("Helo User");
 });
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
