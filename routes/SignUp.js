@@ -8,13 +8,13 @@ import {
   generateDepositAddress,
   generatePrivateKeyFromMnemonic,
 } from "@tatumio/tatum";
-import axios from "axios";
-
+// import fetch from "node-fetch";
 const random = new Random();
 const router = Router();
 config();
 router.post("/", async (req, res) => {
   const { firstName, lastName, email, username, password } = req.body;
+  console.log("Here's Request Body --", req.body);
   if ((firstName, lastName, email, password, username)) {
     try {
       const checkMail = await User.find({ $or: [{ email }, { username }] });
@@ -24,7 +24,21 @@ router.post("/", async (req, res) => {
           .send("User Already Exist With Same Email | Username 🧐");
       } else {
         // Create Virtual Account Here
-        const createWtalletVirtual = async (wallet, currency) => {
+        const vitualCurrency = async (wallet, currency) => {
+          let curParam;
+          switch (currency) {
+            case "BTC":
+              curParam = `bitcoin`;
+              break;
+            case "ETH":
+              curParam = `ethereum`;
+            case "BCH":
+              curParam = `bcash`;
+            case "DOGE":
+              curParam = `dogecoin`;
+            default:
+              break;
+          }
           const createVirtualAccount = async (cur, xpub) => {
             const resp = await fetch(
               `https://api-eu1.tatum.io/v3/ledger/account`,
@@ -43,29 +57,38 @@ router.post("/", async (req, res) => {
             return resp.json();
           };
 
-          try {
-            const v_account = await createVirtualAccount(currency, wallet.xpub);
-            // Create Virtual Address
-            const v_address = await generateDepositAddress(v_account.id);
-            const privateKey = await generatePrivateKeyFromMnemonic(
-              wallet.mnemonic
-            );
-            return { wallet, v_account, v_address, privateKey };
-          } catch (error) {}
+          console.log("Curr ---", currency, wallet.xpub);
+          const v_account = await createVirtualAccount(currency, wallet.xpub);
+          // Create Virtual Address
+          const v_address = await generateDepositAddress(v_account.id);
+
+          const resp = await fetch(
+            `https://api-eu1.tatum.io/v3/${curParam}/wallet/priv`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": `${process.env.TATUM_API_KEY}`,
+              },
+              body: JSON.stringify({
+                index: 0,
+                mnemonic: wallet.mnemonic,
+              }),
+            }
+          );
+          const privateKey = await resp.json();
+          return { wallet, v_account, v_address, privateKey };
         };
         // End Virtual Account Here
         // Create Btc Wallet / Virtual Account
         const btcWallet = await generateWallet(Currency.BTC, false);
-        const btcVirtual = await createWtalletVirtual(btcWallet, "BTC");
-        // Create Eth Wallet and Address
+        const btcVirtual = await vitualCurrency(btcWallet, "BTC");
         const ethWallet = await generateWallet(Currency.ETH, false);
-        const ethVirtual = await createWtalletVirtual(ethWallet, "ETH");
-        // Create Bch Wallet
+        const ethVirtual = await vitualCurrency(ethWallet, "ETH");
         const bchWallet = await generateWallet(Currency.BCH, false);
-        const bchVirtual = await createWtalletVirtual(bchWallet, "BCH");
-        // Create Doge Wallet
+        const bchVirtual = await vitualCurrency(bchWallet, "BCH");
         const dogeWallet = await generateWallet(Currency.DOGE, false);
-        const dogeVirtual = await createWtalletVirtual(dogeWallet, "DOGE");
+        const dogeVirtual = await vitualCurrency(dogeWallet, "DOGE");
         // Add Wallet to Db
         if ((btcVirtual, ethVirtual, bchVirtual, dogeVirtual)) {
           ///Add to db
@@ -84,11 +107,15 @@ router.post("/", async (req, res) => {
           registerUser.save(); // Save user Details / Wallets & Virtual Accounts
           res.status(200).send("Account Created Successfully 🥳");
         } else {
-          res.status(400).send("Something Went Wrong");
+          res.status(400).send("Could not create your wallet");
         }
       }
     } catch (error) {
-      res.status(404).send(`${error.message}`);
+         console.log(error.message);
+      res
+        .status(404)
+        .send(`Could not create your wallet 😖, Please try again later`);
+   
     }
   } else {
     res.status(400).send("Something went wrong");
