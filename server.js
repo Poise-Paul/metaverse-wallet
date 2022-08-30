@@ -10,6 +10,8 @@ import { sendPassword } from "./routes/SendPassword.js";
 import { getBalances } from "./routes/GetBalances.js";
 import { Currency, generateWallet } from "@tatumio/tatum";
 import { sendAssets } from "./routes/SendAssets.js";
+import { transactions } from "./routes/GetTransactions.js";
+
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -36,6 +38,7 @@ app.use("/signIn", signIn);
 app.use("/sentAlert", sendAlert);
 app.use("/getBalances", getBalances);
 app.use("/sendAssets", sendAssets);
+app.use("/transactions", transactions);
 app.get("/", (req, res) => {
   res.send("Helo User");
 });
