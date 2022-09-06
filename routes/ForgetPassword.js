@@ -22,7 +22,6 @@ router
           id: findUser._id,
         };
         const token = jwt.sign(payload, secret, { expiresIn: "15m" });
-        // Send Reset Link to mail
         // console.log(token, findUser);
         res.status(200).send({ _id: findUser._id, token });
       } else {
