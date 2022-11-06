@@ -7,23 +7,6 @@ import nodemailer from "nodemailer";
 const router = new Router();
 let secret;
 // Send Mail
-const sendMailToken = async (resetToken) => {
-  const transport = nodemailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: "3534f9cd344b24",
-      pass: "18416972baa709",
-    },
-  });
-
-  await transport.sendMail({
-    from: "paulnseobong37@gmail.com",
-    to: "stargrades0@gmail.com",
-    subject: "Reset Password Token",
-    text: resetToken,
-  });
-};
 router
   .route("/")
   .post(async (req, res) => {
@@ -40,7 +23,6 @@ router
         };
         const token = jwt.sign(payload, secret, { expiresIn: "15m" });
         // console.log(token, findUser);
-        const result = await sendMailToken(token);
         res.status(200).send({ _id: findUser._id, token });
       } else {
         res.send("Invalid email");

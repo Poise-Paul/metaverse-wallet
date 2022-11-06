@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import cors from "cors";
+import `cors` from "cors";
 import dotenv from "dotenv";
 import { sendAlert } from "./routes/SendAlert.js";
 import { signIn } from "./routes/SignIn.js";
@@ -13,7 +13,7 @@ import { sendAssets } from "./routes/SendAssets.js";
 import { transactions } from "./routes/GetTransactions.js";
 import { forgotPassword } from "./routes/ForgetPassword.js";
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 5000;
 const app = express();
 dotenv.config();
 
