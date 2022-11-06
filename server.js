@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import `cors` from "cors";
+import cors from "cors";
 import dotenv from "dotenv";
 import { sendAlert } from "./routes/SendAlert.js";
 import { signIn } from "./routes/SignIn.js";
